@@ -408,7 +408,7 @@ def do_build(opts, frame_options):
         cmd_configure.append("--define=%s" % nv)
 
     if opts.enable_dds:
-        cmd_configure.append("--enable-dds")
+        cmd_configure.append("--enable-DDS")
 
     if opts.disable_networking:
         cmd_configure.append("--disable-networking")
@@ -929,7 +929,7 @@ def start_mavproxy(opts, stuff):
             if '=' in x:
                 mavargs[i] = x.split('=')[0]
                 mavargs.insert(i+1, x.split('=')[1])
-        # Use this flag to tell if parsing character inbetween a pair
+        # Use this flag to tell if parsing character in between a pair
         # of quotation marks
         inString = False
         beginStringIndex = []

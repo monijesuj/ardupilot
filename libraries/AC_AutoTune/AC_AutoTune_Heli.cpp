@@ -279,7 +279,7 @@ void AC_AutoTune_Heli::test_run(AxisType test_axis, const float dir_sign)
         get_poshold_attitude(roll_cd, pitch_cd, desired_yaw_cd);
 
         // hold level attitude
-        attitude_control->input_euler_angle_roll_pitch_yaw(roll_cd, pitch_cd, desired_yaw_cd, true);
+        attitude_control->input_euler_angle_roll_pitch_yaw_cd(roll_cd, pitch_cd, desired_yaw_cd, true);
 
         if ((tune_type == RP_UP || tune_type == RD_UP) && (max_rate_p.max_allowed <= 0.0f || max_rate_d.max_allowed <= 0.0f)) {
             GCS_SEND_TEXT(MAV_SEVERITY_INFO, "AutoTune: Max Gain Determination Failed");
@@ -849,46 +849,46 @@ void AC_AutoTune_Heli::dwell_test_run(sweep_info &test_data)
 
     switch (axis) {
     case AxisType::ROLL:
-        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_angle_cd + trim_angle_cd.x, trim_angle_cd.y, 0.0f);
+        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw_cd(target_angle_cd + trim_angle_cd.x, trim_angle_cd.y, 0.0f);
         command_reading = motors->get_roll();
         if (test_calc_type == DRB) {
-            tgt_rate_reading = radians(target_angle_cd * 0.01f);
-            gyro_reading = radians(((float)ahrs_view->roll_sensor + trim_angle_cd.x - target_angle_cd) * 0.01f);
+            tgt_rate_reading = cd_to_rad(target_angle_cd);
+            gyro_reading = cd_to_rad((float)ahrs_view->roll_sensor + trim_angle_cd.x - target_angle_cd);
         } else if (test_calc_type == RATE) {
             tgt_rate_reading = attitude_control->rate_bf_targets().x;
             gyro_reading = ahrs_view->get_gyro().x;
         } else {
-            tgt_rate_reading = radians((float)attitude_control->get_att_target_euler_cd().x * 0.01f);
-            gyro_reading = radians((float)ahrs_view->roll_sensor * 0.01f);
+            tgt_rate_reading = cd_to_rad((float)attitude_control->get_att_target_euler_cd().x);
+            gyro_reading = cd_to_rad((float)ahrs_view->roll_sensor);
         }
         break;
     case AxisType::PITCH:
-        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(trim_angle_cd.x, target_angle_cd + trim_angle_cd.y, 0.0f);
+        attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw_cd(trim_angle_cd.x, target_angle_cd + trim_angle_cd.y, 0.0f);
         command_reading = motors->get_pitch();
         if (test_calc_type == DRB) {
-            tgt_rate_reading = radians(target_angle_cd * 0.01f);
-            gyro_reading = radians(((float)ahrs_view->pitch_sensor + trim_angle_cd.y - target_angle_cd) * 0.01f);
+            tgt_rate_reading = cd_to_rad(target_angle_cd);
+            gyro_reading = cd_to_rad((float)ahrs_view->pitch_sensor + trim_angle_cd.y - target_angle_cd);
         } else if (test_calc_type == RATE) {
             tgt_rate_reading = attitude_control->rate_bf_targets().y;
             gyro_reading = ahrs_view->get_gyro().y;
         } else {
-            tgt_rate_reading = radians((float)attitude_control->get_att_target_euler_cd().y * 0.01f);
-            gyro_reading = radians((float)ahrs_view->pitch_sensor * 0.01f);
+            tgt_rate_reading = cd_to_rad((float)attitude_control->get_att_target_euler_cd().y);
+            gyro_reading = cd_to_rad((float)ahrs_view->pitch_sensor);
         }
         break;
     case AxisType::YAW:
     case AxisType::YAW_D:
-        attitude_control->input_euler_angle_roll_pitch_yaw(trim_angle_cd.x, trim_angle_cd.y, wrap_180_cd(trim_yaw_tgt_reading_cd + target_angle_cd), false);
+        attitude_control->input_euler_angle_roll_pitch_yaw_cd(trim_angle_cd.x, trim_angle_cd.y, wrap_180_cd(trim_yaw_tgt_reading_cd + target_angle_cd), false);
         command_reading = motors->get_yaw();
         if (test_calc_type == DRB) {
-            tgt_rate_reading = radians(target_angle_cd * 0.01f);
-            gyro_reading = radians((wrap_180_cd((float)ahrs_view->yaw_sensor - trim_yaw_heading_reading_cd - target_angle_cd)) * 0.01f);
+            tgt_rate_reading = cd_to_rad(target_angle_cd);
+            gyro_reading = cd_to_rad(wrap_180_cd((float)ahrs_view->yaw_sensor - trim_yaw_heading_reading_cd - target_angle_cd));
         } else if (test_calc_type == RATE) {
             tgt_rate_reading = attitude_control->rate_bf_targets().z;
             gyro_reading = ahrs_view->get_gyro().z;
         } else {
-            tgt_rate_reading = radians((wrap_180_cd((float)attitude_control->get_att_target_euler_cd().z - trim_yaw_tgt_reading_cd)) * 0.01f);
-            gyro_reading = radians((wrap_180_cd((float)ahrs_view->yaw_sensor - trim_yaw_heading_reading_cd)) * 0.01f);
+            tgt_rate_reading = cd_to_rad(wrap_180_cd((float)attitude_control->get_att_target_euler_cd().z - trim_yaw_tgt_reading_cd));
+            gyro_reading = cd_to_rad((wrap_180_cd((float)ahrs_view->yaw_sensor - trim_yaw_heading_reading_cd)));
         }
         break;
     }

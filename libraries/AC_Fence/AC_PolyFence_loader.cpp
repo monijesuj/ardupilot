@@ -285,7 +285,7 @@ bool AC_PolyFence_loader::breached(const Location& loc, float& distance_outside_
         circle_center.lat = circle.point.x;
         circle_center.lng = circle.point.y;
         const float diff_cm = loc.get_distance(circle_center)*100.0f;
-        distance_outside_fence = MAX(distance_outside_fence, circle.radius - diff_cm/100.0f);
+        distance_outside_fence = MAX(distance_outside_fence, circle.radius - diff_cm*0.01f);
         if (diff_cm < circle.radius * 100.0f) {
             return true;
         }
@@ -297,7 +297,7 @@ bool AC_PolyFence_loader::breached(const Location& loc, float& distance_outside_
         circle_center.lat = circle.point.x;
         circle_center.lng = circle.point.y;
         const float diff_cm = loc.get_distance(circle_center)*100.0f;
-        distance_outside_fence = MAX(distance_outside_fence, diff_cm/100.0f - circle.radius);
+        distance_outside_fence = MAX(distance_outside_fence, diff_cm*0.01f - circle.radius);
         if (diff_cm > circle.radius * 100.0f) {
             num_inclusion_outside++;
         }
@@ -982,7 +982,7 @@ bool AC_PolyFence_loader::validate_fence(const AC_PolyFenceItem *new_items, uint
                     GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Received incorrect vertex type (want=%u got=%u)", (unsigned)expecting_type, (unsigned)new_items[i].type);
                     return false;
                 } else if (new_items[i].vertex_count != orig_expected_type_count) {
-                    GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Unexpected vertex count want=%u got=%u\n", orig_expected_type_count, new_items[i].vertex_count);
+                    GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "Unexpected vertex count want=%u got=%u", orig_expected_type_count, new_items[i].vertex_count);
                     return false;
                 }
             }

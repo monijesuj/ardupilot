@@ -450,7 +450,7 @@ void Plane::reset_offset_altitude(void)
 void Plane::set_offset_altitude_location(const Location &start_loc, const Location &destination_loc)
 {
     ftype alt_difference_m = 0;
-    if (destination_loc.get_alt_distance(start_loc, alt_difference_m)) {
+    if (destination_loc.get_height_above(start_loc, alt_difference_m)) {
         target_altitude.offset_cm = alt_difference_m * 100;
     } else {
         target_altitude.offset_cm = 0;
@@ -946,7 +946,7 @@ void Plane::fix_terrain_WP(Location &loc, uint32_t linenum)
     if (loc.terrain_alt && !loc.relative_alt) {
         AP::internalerror().error(AP_InternalError::error_t::flow_of_control, linenum);
         /*
-          we definately have a bug, now we need to guess what was
+          we definitely have a bug, now we need to guess what was
           really meant. The lack of the relative_alt flag notionally
           means that home.alt has been added to loc.alt, so remove it,
           but only if it doesn't lead to a negative terrain altitude

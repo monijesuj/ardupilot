@@ -204,6 +204,12 @@ void Plane::ahrs_update()
 
     // update inertial_nav for quadplane
     quadplane.inertial_nav.update();
+    if (quadplane.available()) {  
+        quadplane.pos_control->update_estimates();  
+    }
+#endif
+#if AP_SCRIPTING_ENABLED && AP_FOLLOW_ENABLED
+        g2.follow.update_estimates();
 #endif
 
 #if HAL_LOGGING_ENABLED
@@ -351,9 +357,6 @@ void Plane::one_second_loop()
                                   (float)((aparm.airspeed_max - aparm.airspeed_min)/2));
     }
 
-    // sync MAVLink system ID
-    mavlink_system.sysid = gcs().sysid_this_mav();
-
     AP::srv().enable_aux_servos();
 
     // update notify flags
@@ -428,8 +431,8 @@ void Plane::airspeed_ratio_update(void)
         return;
     }
     if (labs(ahrs.roll_sensor) > roll_limit_cd ||
-        ahrs.pitch_sensor > aparm.pitch_limit_max*100 ||
-        ahrs.pitch_sensor < pitch_limit_min*100) {
+        ahrs.get_pitch_deg() > aparm.pitch_limit_max ||
+        ahrs.get_pitch_deg() < pitch_limit_min) {
         // don't calibrate when going beyond normal flight envelope
         return;
     }
@@ -840,7 +843,7 @@ bool Plane::get_wp_distance_m(float &distance) const
     }
 #if HAL_QUADPLANE_ENABLED
     if (quadplane.in_vtol_mode()) {
-        distance = quadplane.using_wp_nav() ? quadplane.wp_nav->get_wp_distance_to_destination() * 0.01 : 0;
+        distance = quadplane.using_wp_nav() ? quadplane.wp_nav->get_wp_distance_to_destination_cm() * 0.01 : 0;
         return true;
     }
 #endif
@@ -856,7 +859,7 @@ bool Plane::get_wp_bearing_deg(float &bearing) const
     }
 #if HAL_QUADPLANE_ENABLED
     if (quadplane.in_vtol_mode()) {
-        bearing = quadplane.using_wp_nav() ? quadplane.wp_nav->get_wp_bearing_to_destination() : 0;
+        bearing = quadplane.using_wp_nav() ? quadplane.wp_nav->get_wp_bearing_to_destination_cd() : 0;
         return true;
     }
 #endif
@@ -1011,6 +1014,12 @@ bool Plane::is_taking_off() const
 #endif
     return control_mode->is_taking_off();
 }
+
+#if HAL_QUADPLANE_ENABLED
+bool Plane::start_takeoff(const float alt) {
+    return plane.quadplane.available() && quadplane.do_user_takeoff(alt);
+}
+#endif
 
 // correct AHRS pitch for PTCH_TRIM_DEG in non-VTOL modes, and return VTOL view in VTOL
 void Plane::get_osd_roll_pitch_rad(float &roll, float &pitch) const

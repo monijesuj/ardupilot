@@ -143,7 +143,7 @@ const AP_Param::GroupInfo AP_DroneCAN::var_info[] = {
 
     // @Param: ESC_OF
     // @DisplayName: ESC Output channels offset
-    // @Description: Offset for ESC numbering in DroneCAN ESC RawCommand messages. This allows for more efficient packing of ESC command messages. If your ESCs are on servo functions 5 to 8 and you set this parameter to 4 then the ESC RawCommand will be sent with the first 4 slots filled. This can be used for more efficient usage of CAN bandwidth
+    // @Description: Offset for ESC numbering in DroneCAN ESC RawCommand messages. This allows for more efficient packing of ESC command messages. If your ESCs are on servo outputs 5 to 8 and you set this parameter to 4 then the ESC RawCommand will be sent with the first 4 slots filled. This can be used for more efficient usage of CAN bandwidth
     // @Range: 0 18
     // @User: Advanced
     AP_GROUPINFO("ESC_OF", 7, AP_DroneCAN, _esc_offset, 0),
@@ -1389,7 +1389,7 @@ void AP_DroneCAN::handle_actuator_status(const CanardRxTransfer& transfer, const
     }
 
     const AP_Servo_Telem::TelemetryData telem_data {
-        .measured_position = ToDeg(msg.position),
+        .measured_position = degrees(msg.position),
         .force = msg.force,
         .speed = msg.speed,
         .duty_cycle = msg.power_rating_pct,
@@ -1444,7 +1444,7 @@ void AP_DroneCAN::handle_actuator_status_Volz(const CanardRxTransfer& transfer, 
     }
 
     const AP_Servo_Telem::TelemetryData telem_data {
-        .measured_position = ToDeg(msg.actual_position),
+        .measured_position = degrees(msg.actual_position),
         .voltage = msg.voltage * 0.2,
         .current = msg.current * 0.025,
         .duty_cycle = uint8_t(msg.motor_pwm * (100.0/255.0)),
